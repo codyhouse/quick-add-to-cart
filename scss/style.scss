@@ -1,0 +1,556 @@
+@import 'bourbon'; // http://bourbon.io/
+
+@import '../partials/variables'; // colors, fonts etc...
+
+@import '../partials/mixins'; // custom mixins
+
+@import '../partials/layout'; // responsive grid and media queries
+
+/* -------------------------------- 
+
+Primary style
+
+-------------------------------- */
+
+*, *::after, *::before {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 62.5%;
+}
+
+body {
+	font: {
+		size: 1.6rem;
+		family: $primary-font; // variables inside partials > _variables.scss
+	}
+	color: $color-1;
+	background-color: shade($color-4, 5%);
+}
+
+a {
+	color: $color-2;
+	text-decoration: none;
+}
+
+img, svg {
+	max-width: 100%;
+}
+
+button {
+	@include appearance(none);
+	cursor: pointer;
+	border: none;
+	padding: 0;
+
+	&:focus {
+		outline: none;
+	}
+}
+
+header {
+	height: 80px;
+	position: relative;
+	padding-top: 40px;
+
+	h1 {
+		text-align: center;
+		width: 90%;
+		margin: 0 auto;
+	}
+
+	@include MQ(M) {
+		height: 200px;
+		padding-top: 100px;
+
+		h1 {
+			font-size: 2.2rem;
+		}
+	}	
+}
+
+/* -------------------------------- 
+
+Cart button
+
+-------------------------------- */
+
+.cd-cart {
+	position: absolute;
+	z-index: 2;
+	top: 24px;
+	right: 10px;
+	height: 50px;
+	width: 50px;
+	background: url(../img/cd-icon-cart.svg) no-repeat center center;
+
+	span {
+		/* number of items added to the cart */
+		position: absolute;
+		top: 2px;
+		right: 5px;
+		height: 18px;
+		width: 18px;
+		line-height: 18px;
+		background-color: $color-5;
+		color: $color-4;
+		font-size: 1rem;
+		font-weight: bold;
+		text-align: center;
+		border-radius: 50%;
+		
+		/* scale it down if no products have been added to the cart */
+		@include transform(scale(0));
+		@include transition(transform .2s 0s);
+	}
+
+	&.items-added span {
+		/* counter visible when a product is added to the cart */
+		@include transform(scale(1));
+	}
+
+	@include MQ(L) {
+		position: fixed;
+		top: 30px;
+		right: 30px;
+	}
+}
+
+/* -------------------------------- 
+
+Gallery grid
+
+-------------------------------- */
+
+.cd-gallery {
+	width: 90%;
+	max-width: $L;
+	margin: 1.5em auto;
+
+	> li {
+		margin-bottom: 2em;
+	}
+
+	@include MQ(M) {
+		margin-top: 2em;
+		@include clearfix;
+
+		> li {
+			@include column(.48);
+			margin: 0 4% 6% 0;
+
+			&:nth-of-type(2n) {
+				margin-right: 0;
+			}
+		}
+	}
+
+	@include MQ(L) {
+		margin-top: 2.5em;
+
+		> li {
+			@include column(.3);
+			margin: 0 5% 5% 0;
+
+			&:nth-of-type(2n) {
+				margin-right: 5%;
+			}
+
+			&:nth-of-type(3n) {
+				margin-right: 0;
+			}
+		}
+	}
+}
+
+/* -------------------------------- 
+
+Single Item
+
+-------------------------------- */
+
+.cd-single-item {
+	position: relative;
+
+	> a {
+		display: block;
+		background-color: $color-4;
+		box-shadow: 0 2px 10px rgba(#000, .08);
+		border-radius: 4px;
+	}
+
+	.no-touch &:hover, &.hover {
+
+		.cd-customization {
+			/* product customization visible */
+			pointer-events: auto;
+			visibility: visible;
+			opacity: 1;
+			@include transition(opacity .2s 0s, visiblity 0s 0s);
+		}
+
+		.cd-customization-trigger {
+			/* this is the settings icon - visible on touch devices only */
+			display: none;
+		}
+	}
+}
+
+/* -------------------------------- 
+
+Product Slider
+
+-------------------------------- */
+
+.cd-slider-wrapper {
+	position: relative;
+	overflow: hidden;
+	
+	li {
+		position: absolute;
+		top: 0;
+		left: 0;
+		visibility: hidden;
+		
+		/* Force Hardware Acceleration in WebKit */
+		@include transform(translateZ(0));
+		@include backface-visibility(hidden);
+		
+		/* by default, move the product image on the right*/
+		@include transform(translateX(100%));
+		@include transition(transform .3s 0s, visibility 0s .3s);
+
+		&.selected {
+			/* this is the visible product image */
+			position: relative;
+			visibility: visible;
+			z-index: 1;
+
+			@include transform(translateX(0));
+			@include transition(transform .3s 0s, visibility 0s 0s);
+		}
+
+		&.move-left {
+			/* move the product image on the left */
+			@include transform(translateX(-100%));
+		}
+	}
+
+	img {
+		width: 100%;
+		display: block;
+		border-radius: 4px;
+	}
+}
+
+/* -------------------------------- 
+
+Product Customization
+
+-------------------------------- */
+
+.cd-customization {
+	position: absolute;
+	z-index: 2;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	padding: 16px;
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	@include clearfix;
+	@include transition(opacity .2s 0s, visibility 0s .2s);
+
+	> * {
+		float: left;
+	}
+
+	.color, .size, .add-to-cart {
+		height: 34px;
+		border-radius: 3px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.color, .size {
+		/* these are the color and size options */
+		display: inline-block;
+		cursor: pointer;
+		box-shadow: inset 0 0 0 1px shade($color-4, 10%);
+
+		/* Force Hardware Acceleration - fix a bug on Safari */
+		@include transform(translateZ(0));
+		@include backface-visibility(hidden);
+
+		&:hover {
+			box-shadow: inset 0 0 0 1px shade($color-4, 20%);
+		}
+
+		ul {
+			display: inline-block;
+			position: absolute;
+			@include center;
+			width: 100%;
+			border-radius: 3px;
+			border: 1px solid transparent;
+		}
+
+		li {
+			position: relative;
+			height: 34px;
+		}
+
+		ul {
+			
+			li:first-of-type {
+				/* arrange list items according to the selected color/size option */
+				@include transform(translateY(100%));
+				border-radius: 0;
+			}
+
+			li:nth-of-type(2) {
+				@include transform(translateY(-100%));
+				border-radius: 3px 3px 0 0;
+			}
+
+			li:nth-of-type(3) {
+				@include transform(translateY(0));
+				border-radius: 0 0 3px 3px;
+			}
+		}
+
+		&.selected-2 ul {
+
+			li:first-of-type, li:nth-of-type(2), li:nth-of-type(3) {
+				/* second option selected in the ul.color/ul.size list*/
+				@include transform(translateY(0));
+			}
+
+			li:first-of-type {
+				border-radius: 3px 3px 0 0;
+			}
+
+			li:nth-of-type(2) {
+				border-radius: 0;
+			}
+		}
+
+
+		&.selected-3 ul {
+
+			li:first-of-type {
+				/* third option selected in the ul.color/ul.size list */
+				@include transform(translateY(0));
+				border-radius: 3px 3px 0 0;
+			}
+
+			li:nth-of-type(2) {
+				@include transform(translateY(100%));
+				border-radius: 0 0 3px 3px;
+			}
+			
+			li:nth-of-type(3) {
+				@include transform(translateY(-100%));
+				border-radius: 0;
+			}
+		}
+
+		&.is-open {
+			/* color/size list open - make ul element visible */
+			overflow: visible;
+			box-shadow: none;
+
+			&::after {
+				/* remove the arrow icon for the size option element */
+				display: none;
+			}
+
+			ul {
+				box-shadow: 0 2px 3px rgba(#000, .1);
+				border-color: shade($color-4, 10%);
+				background-color: $color-4;
+			}
+
+			li:hover, li.active {
+				background-color: shade($color-4, 5%);
+			}
+		}
+	}
+
+	.color {
+		width: 34px;
+
+		li {
+			/* replace color name with colored circle */
+			overflow: hidden;
+			text-indent: 100%;
+			white-space: nowrap;
+			color: transparent;
+
+			&::before {
+				/* this is the colored circle */
+				content: '';
+				position: absolute;
+				@include center;
+				height: 10px;
+				width: 10px;
+				border-radius: 50%;
+			}
+
+			&.color-1::before {
+				background-color: $color-1;
+			}
+
+			&.color-2::before {
+				background-color: $color-2;
+			}
+
+			&.color-3::before {
+				background-color: $color-3;
+			}
+		}
+	}
+
+	.size {
+		margin: 0 6px;
+
+		&::after {
+			/* arrow icon for the size option element */
+			content: '';
+			position: absolute;
+			right: 7px;
+			top: 50%;
+			margin-top: -8px;
+
+			display: block;
+			width: 16px;
+			height: 16px;
+
+			background: url('../img/cd-icon-arrow.svg') no-repeat center center;
+			pointer-events: none;
+		}
+
+		li {
+			padding: 0 1em;
+		}
+	}
+
+	.size, .add-to-cart {
+		width: calc(50% - 23px);
+	}
+
+	.size li, .add-to-cart {
+		font-size: 1.2rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		line-height: 34px;
+	}
+
+	.add-to-cart {
+		color: $color-4;
+		background-color: $color-5;
+		@include font-smoothing;
+
+		.no-touch &:hover {
+			background-color: lighten($color-5, 5%);
+		}
+
+		em {
+			/* this is the button text message */
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			/* Force Hardware Acceleration */
+			@include transform(translateZ(0));
+			@include backface-visibility(hidden);
+			
+			@include transition(transform 0.3s);
+		}
+
+		svg {
+			/* this is the check icon */
+			position: absolute;
+			left: 50%;
+		    top: 50%;
+		    width: 100%;
+		    /* move the icon on the right - outside the button */
+		    @include transform(translateX(50%) translateY(-50%));
+			@include transition(transform 0.3s);
+		}
+
+		&.is-added em {
+			/* product added to the cart - hide text message on the left with no transition*/
+			color: transparent;
+			@include transform(translateX(-100%));
+			@include transition(transform 0s);
+		}
+
+		&.is-added svg {
+			/* product added to the cart - move the svg back inside the button */
+			@include transform(translateX(-50%) translateY(-50%));
+			@include transition(transform 0s);
+		}
+	}
+}
+
+/* -------------------------------- 
+
+Settings icon - touch devices only
+
+-------------------------------- */
+
+.cd-customization-trigger {
+	position: absolute;
+	z-index: 2;
+	right: 0px;
+	bottom: 0px;
+	height: 40px;
+	width: 40px;
+	
+	/* replace text with an icon */
+	overflow: hidden;
+	text-indent: 100%;
+	white-space: nowrap;
+	color: transparent;
+	
+	background: url(../img/cd-icon-settings.svg) no-repeat center center;
+	display: none;
+
+	.touch & {
+		display: block;
+	}
+}
+
+/* -------------------------------- 
+
+Product Info (title + price)
+
+-------------------------------- */
+
+.cd-item-info {
+	padding: 1em .5em 0;	
+	color: $color-1;
+	font-weight: bold;
+	@include clearfix;
+
+	b {
+		float: left;
+	}
+
+	em {
+		float: right;
+		color: lighten($color-1, 20%);
+	}
+
+	a {
+		color: $color-1;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
